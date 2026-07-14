@@ -6,31 +6,38 @@ import '../../../core/theme/app_spacing.dart';
 import '../../../core/widgets/responsive_layout.dart';
 import '../../providers/auth_provider.dart';
 import '../../widgets/app_top_nav.dart';
-import 'sign_up_screen.dart';
 
-class LoginScreen extends StatefulWidget {
-  const LoginScreen({super.key});
+class SignUpScreen extends StatefulWidget {
+  const SignUpScreen({super.key});
 
   @override
-  State<LoginScreen> createState() => _LoginScreenState();
+  State<SignUpScreen> createState() => _SignUpScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _SignUpScreenState extends State<SignUpScreen> {
   final _emailController = TextEditingController();
+  final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _confirmController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
 
   @override
   void dispose() {
     _emailController.dispose();
+    _usernameController.dispose();
     _passwordController.dispose();
+    _confirmController.dispose();
     super.dispose();
   }
 
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
     final auth = context.read<AuthProvider>();
-    final success = await auth.logIn(_emailController.text.trim(), _passwordController.text);
+    final success = await auth.signUp(
+      _emailController.text.trim(),
+      _usernameController.text.trim(),
+      _passwordController.text,
+    );
     if (success && mounted) {
       Navigator.pushReplacementNamed(context, '/home');
     }
@@ -51,32 +58,35 @@ class _LoginScreenState extends State<LoginScreen> {
           children: [
             Text('Login', style: AppTextStyles.heading1),
             const SizedBox(height: AppSpacing.lg),
-            Align(
-              alignment: Alignment.centerLeft,
-              child: Text('Email', style: AppTextStyles.label),
-            ),
-            const SizedBox(height: AppSpacing.xs),
+            _label('Email'),
             TextFormField(
               controller: _emailController,
-              validator: (v) =>
-              (v == null || !v.contains('@')) ? 'Enter a valid email' : null,
+              validator: (v) => (v == null || !v.contains('@')) ? 'Enter a valid email' : null,
             ),
             const SizedBox(height: AppSpacing.md),
-            Align(
-              alignment: Alignment.centerLeft,
-              child: Text('Password', style: AppTextStyles.label),
+            _label('Username'),
+            TextFormField(
+              controller: _usernameController,
+              validator: (v) => (v == null || v.isEmpty) ? 'Enter a username' : null,
             ),
-            const SizedBox(height: AppSpacing.xs),
+            const SizedBox(height: AppSpacing.md),
+            _label('Password'),
             TextFormField(
               controller: _passwordController,
               obscureText: true,
+              validator: (v) => (v == null || v.length < 6) ? 'Min 6 characters' : null,
+            ),
+            const SizedBox(height: AppSpacing.md),
+            _label('Confirm Password'),
+            TextFormField(
+              controller: _confirmController,
+              obscureText: true,
               validator: (v) =>
-              (v == null || v.length < 6) ? 'Min 6 characters' : null,
+              v != _passwordController.text ? 'Passwords do not match' : null,
             ),
             if (auth.status == AuthStatus.error && auth.errorMessage != null) ...[
               const SizedBox(height: AppSpacing.sm),
-              Text(auth.errorMessage!,
-                  style: const TextStyle(color: AppColors.error, fontSize: 13)),
+              Text(auth.errorMessage!, style: const TextStyle(color: AppColors.error, fontSize: 13)),
             ],
             const SizedBox(height: AppSpacing.lg),
             SizedBox(
@@ -85,29 +95,24 @@ class _LoginScreenState extends State<LoginScreen> {
                 onPressed: auth.status == AuthStatus.loading ? null : _submit,
                 child: auth.status == AuthStatus.loading
                     ? const SizedBox(
-                  height: 20,
-                  width: 20,
-                  child: CircularProgressIndicator(
-                    color: Colors.white,
-                    strokeWidth: 2,
-                  ),
-                )
-                    : const Text('Log In'),
+                    height: 20, width: 20,
+                    child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                    : const Text('Sign In'),
               ),
-            ),
-            const SizedBox(height: AppSpacing.md),
-            TextButton(
-              onPressed: () => Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const SignUpScreen()),
-              ),
-              child: const Text("Don't have an account? Sign Up"),
             ),
           ],
         ),
       ),
     );
   }
+
+  Widget _label(String text) => Align(
+    alignment: Alignment.centerLeft,
+    child: Padding(
+      padding: const EdgeInsets.only(bottom: AppSpacing.xs),
+      child: Text(text, style: AppTextStyles.label),
+    ),
+  );
 
   @override
   Widget build(BuildContext context) {

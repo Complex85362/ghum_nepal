@@ -113,7 +113,23 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       child: const Text('Change Password'),
                     ),
                   ),
-                  const SizedBox(height: AppSpacing.md),
+                  const SizedBox(height: AppSpacing.lg),
+                  const Divider(color: AppColors.divider),
+                  const SizedBox(height: AppSpacing.sm),
+                  SizedBox(
+                    width: double.infinity,
+                    child: OutlinedButton.icon(
+                      onPressed: () => Navigator.pushNamed(context, '/admin'),
+                      icon: const Icon(Icons.admin_panel_settings_outlined,
+                          color: AppColors.primary),
+                      label: const Text('Admin Panel (dev)'),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: AppColors.primary,
+                        side: const BorderSide(color: AppColors.primary),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.sm),
                   TextButton(
                     onPressed: () async {
                       await auth.logOut();

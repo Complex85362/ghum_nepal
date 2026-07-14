@@ -6,7 +6,7 @@ import '../../../core/widgets/responsive_layout.dart';
 import '../../widgets/app_top_nav.dart';
 import '../../widgets/destination_card.dart';
 import 'category_screen.dart';
-import '../../../core/dev/seed_data.dart'; // TODO: remove before final submission
+
 
 class HomeFeedScreen extends StatefulWidget {
   const HomeFeedScreen({super.key});
@@ -128,18 +128,8 @@ class _HomeFeedScreenState extends State<HomeFeedScreen> {
                   ),
                   child: const Text('Discover'),
                 ),
-                // TODO: remove this button before final submission
-                TextButton(
-                  onPressed: () async {
-                    await seedDestinations();
-                    if (context.mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Seeded!')),
-                      );
-                    }
-                  },
-                  child: const Text('SEED (dev only)', style: TextStyle(color: Colors.white70)),
-                ),
+
+
               ],
             ),
           ),

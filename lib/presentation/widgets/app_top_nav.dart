@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/widgets/responsive_layout.dart';
+import '../screens/home_feed/search_screen.dart';
 
 class AppTopNav extends StatelessWidget implements PreferredSizeWidget {
   final VoidCallback? onMenuTap;
@@ -45,14 +46,23 @@ class AppTopNav extends StatelessWidget implements PreferredSizeWidget {
             SizedBox(
               width: isMobile ? 130 : 200,
               height: 40,
-              child: TextField(
-                decoration: InputDecoration(
-                  hintText: '',
-                  prefixIcon: const Icon(Icons.search, color: AppColors.primary, size: 20),
-                  contentPadding: const EdgeInsets.symmetric(vertical: 0),
-                  border: OutlineInputBorder(
+              child: GestureDetector(
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const SearchScreen()),
+                ),
+                child: Container(
+                  width: isMobile ? 130 : 200,
+                  height: 40,
+                  padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
+                  decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-                    borderSide: const BorderSide(color: AppColors.border),
+                    border: Border.all(color: AppColors.border),
+                  ),
+                  child: const Row(
+                    children: [
+                      Icon(Icons.search, color: AppColors.primary, size: 20),
+                    ],
                   ),
                 ),
               ),

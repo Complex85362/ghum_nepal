@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_text_styles.dart';
@@ -9,6 +10,8 @@ import '../../../data/models/destination_model.dart';
 import '../../../data/models/review_model.dart';
 import '../../../data/repositories/destination_repository.dart';
 import '../../../data/repositories/review_repository.dart';
+import '../../providers/auth_provider.dart';
+import '../../providers/wishlist_provider.dart';
 import '../../widgets/app_top_nav.dart';
 import '../map/destination_map_view.dart';
 
@@ -41,6 +44,12 @@ class _DestinationDetailScreenState extends State<DestinationDetailScreen>
     try {
       final destination = await _destinationRepo.getById(widget.destinationId);
       setState(() => _destinationState = ViewLoaded(destination));
+
+      // Check wishlist status once destination + user are known
+      final auth = context.read<AuthProvider>();
+      if (auth.user != null && mounted) {
+        context.read<WishlistProvider>().loadWishlist(auth.user!.uid);
+      }
     } catch (e) {
       setState(() => _destinationState = ViewFailed(e.toString()));
     }
@@ -84,8 +93,37 @@ class _DestinationDetailScreenState extends State<DestinationDetailScreen>
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(destination.name,
-                        style: AppTextStyles.heading1, textAlign: TextAlign.center),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Expanded(
+                          child: Text(
+                            destination.name,
+                            style: AppTextStyles.heading1,
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                        Consumer2<AuthProvider, WishlistProvider>(
+                          builder: (context, auth, wishlist, _) {
+                            final uid = auth.user?.uid;
+                            final saved = wishlist.isSaved(destination.id);
+                            return IconButton(
+                              icon: Icon(
+                                saved ? Icons.bookmark : Icons.bookmark_border,
+                                color: AppColors.primary,
+                              ),
+                              onPressed: uid == null
+                                  ? () => ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text('Log in to save destinations.'),
+                                ),
+                              )
+                                  : () => wishlist.toggle(uid, destination),
+                            );
+                          },
+                        ),
+                      ],
+                    ),
                     const SizedBox(height: AppSpacing.md),
                     isMobile
                         ? Column(children: _galleryChildren(destination, isMobile))
@@ -135,11 +173,18 @@ class _DestinationDetailScreenState extends State<DestinationDetailScreen>
     return destination.galleryImageUrls.take(2).map((url) {
       final img = ClipRRect(
         borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
-        child: Image.network(url, height: 120, fit: BoxFit.cover, width: double.infinity),
+        child: Image.network(
+          url,
+          height: 120,
+          fit: BoxFit.cover,
+          width: double.infinity,
+          errorBuilder: (c, e, s) => Container(height: 120, color: AppColors.divider),
+        ),
       );
       return isMobile
           ? Padding(padding: const EdgeInsets.only(bottom: AppSpacing.sm), child: img)
-          : Expanded(child: Padding(padding: const EdgeInsets.only(right: AppSpacing.sm), child: img));
+          : Expanded(
+          child: Padding(padding: const EdgeInsets.only(right: AppSpacing.sm), child: img));
     }).toList();
   }
 

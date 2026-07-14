@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/widgets/responsive_layout.dart';
-import '../../providers/destination_provider.dart';
 import '../../widgets/app_top_nav.dart';
 import '../../widgets/destination_card.dart';
+import 'category_screen.dart';
+import '../../../core/dev/seed_data.dart'; // TODO: remove before final submission
 
 class HomeFeedScreen extends StatefulWidget {
   const HomeFeedScreen({super.key});
@@ -17,10 +17,10 @@ class HomeFeedScreen extends StatefulWidget {
 
 class _HomeFeedScreenState extends State<HomeFeedScreen> {
   final _exploreCategories = const [
-    {'title': 'Hikes', 'image': 'https://images.unsplash.com/photo-1551632811-561732d1e306'},
-    {'title': 'Food Spots', 'image': 'https://images.unsplash.com/photo-1504674900247-0877df9cc836'},
-    {'title': 'View Points', 'image': 'https://images.unsplash.com/photo-1544735716-392fe2489ffa'},
-    {'title': 'Lakes', 'image': 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4'},
+    {'title': 'Hikes', 'category': 'hikes', 'image': 'https://images.unsplash.com/photo-1551632811-561732d1e306'},
+    {'title': 'Food Spots', 'category': 'food', 'image': 'https://images.unsplash.com/photo-1504674900247-0877df9cc836'},
+    {'title': 'View Points', 'category': 'viewpoints', 'image': 'https://images.unsplash.com/photo-1544735716-392fe2489ffa'},
+    {'title': 'Lakes', 'category': 'lakes', 'image': 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4'},
   ];
 
   final _cities = const [
@@ -47,11 +47,16 @@ class _HomeFeedScreenState extends State<HomeFeedScreen> {
                 children: [
                   Text('Explore Nepal', style: AppTextStyles.heading2),
                   const SizedBox(height: AppSpacing.md),
-                  _cardGrid(_exploreCategories, isMobile),
+                  _categoryGrid(isMobile),
                   const SizedBox(height: AppSpacing.md),
                   Center(
                     child: ElevatedButton(
-                      onPressed: () => Navigator.pushNamed(context, '/discover'),
+                      onPressed: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const CategoryScreen(category: 'hikes', title: 'Hikes'),
+                        ),
+                      ),
                       child: const Text('View More'),
                     ),
                   ),
@@ -68,7 +73,7 @@ class _HomeFeedScreenState extends State<HomeFeedScreen> {
                 children: [
                   Text('Discover the cities of Nepal', style: AppTextStyles.heading2),
                   const SizedBox(height: AppSpacing.md),
-                  _cardGrid(_cities, isMobile),
+                  _cityGrid(isMobile),
                   const SizedBox(height: AppSpacing.md),
                   Center(
                     child: ElevatedButton(
@@ -115,8 +120,25 @@ class _HomeFeedScreenState extends State<HomeFeedScreen> {
                     backgroundColor: Colors.white,
                     foregroundColor: AppColors.primary,
                   ),
-                  onPressed: () => Navigator.pushNamed(context, '/discover'),
+                  onPressed: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const CategoryScreen(category: 'hikes', title: 'Hikes'),
+                    ),
+                  ),
                   child: const Text('Discover'),
+                ),
+                // TODO: remove this button before final submission
+                TextButton(
+                  onPressed: () async {
+                    await seedDestinations();
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Seeded!')),
+                      );
+                    }
+                  },
+                  child: const Text('SEED (dev only)', style: TextStyle(color: Colors.white70)),
                 ),
               ],
             ),
@@ -177,7 +199,11 @@ class _HomeFeedScreenState extends State<HomeFeedScreen> {
                     backgroundColor: Colors.white,
                     foregroundColor: AppColors.primary,
                   ),
-                  onPressed: () => Navigator.pushNamed(context, '/submit'),
+                  onPressed: () {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Submission form coming next.')),
+                    );
+                  },
                   child: const Text('Publish'),
                 ),
               ],
@@ -188,12 +214,12 @@ class _HomeFeedScreenState extends State<HomeFeedScreen> {
     );
   }
 
-  Widget _cardGrid(List<Map<String, String>> items, bool isMobile) {
+  Widget _categoryGrid(bool isMobile) {
     final crossAxisCount = isMobile ? 2 : 4;
     return GridView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
-      itemCount: items.length,
+      itemCount: _exploreCategories.length,
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: crossAxisCount,
         crossAxisSpacing: AppSpacing.sm,
@@ -201,7 +227,39 @@ class _HomeFeedScreenState extends State<HomeFeedScreen> {
         childAspectRatio: 1,
       ),
       itemBuilder: (context, index) {
-        final item = items[index];
+        final item = _exploreCategories[index];
+        return DestinationCard(
+          imageUrl: item['image']!,
+          title: item['title']!,
+          height: double.infinity,
+          onTap: () => Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => CategoryScreen(
+                category: item['category']!,
+                title: item['title']!,
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _cityGrid(bool isMobile) {
+    final crossAxisCount = isMobile ? 2 : 4;
+    return GridView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      itemCount: _cities.length,
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: crossAxisCount,
+        crossAxisSpacing: AppSpacing.sm,
+        mainAxisSpacing: AppSpacing.sm,
+        childAspectRatio: 1,
+      ),
+      itemBuilder: (context, index) {
+        final item = _cities[index];
         return DestinationCard(
           imageUrl: item['image']!,
           title: item['title']!,

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "958648486231",
+    "project_id": "ghumnepal-9cec4",
+    "storage_bucket": "ghumnepal-9cec4.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:958648486231:android:c190a79fff93d7d9dd1612",
+        "android_client_info": {
+          "package_name": "com.example.ghum_nepal"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCu0mc7LaMtDZ3QeZH3NBPQfwXRhE4MJzs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

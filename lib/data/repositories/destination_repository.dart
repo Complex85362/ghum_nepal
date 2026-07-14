@@ -69,4 +69,30 @@ class DestinationRepository {
       throw const Failure('Could not submit destination.');
     }
   }
+  Future<List<DestinationModel>> getPendingSubmissions() async {
+    try {
+      final snapshot = await _collection.where('approved', isEqualTo: false).get();
+      return snapshot.docs
+          .map((d) => DestinationModel.fromMap(d.data() as Map<String, dynamic>, d.id))
+          .toList();
+    } catch (_) {
+      throw const Failure('Could not load pending submissions.');
+    }
+  }
+
+  Future<void> approveSubmission(String id) async {
+    try {
+      await _collection.doc(id).update({'approved': true, 'isFeatured': false});
+    } catch (_) {
+      throw const Failure('Could not approve submission.');
+    }
+  }
+
+  Future<void> rejectSubmission(String id) async {
+    try {
+      await _collection.doc(id).delete();
+    } catch (_) {
+      throw const Failure('Could not reject submission.');
+    }
+  }
 }

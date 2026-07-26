@@ -8,6 +8,8 @@ import '../../../core/widgets/state_view.dart';
 import '../../../data/models/destination_model.dart';
 import '../../providers/admin_provider.dart';
 import '../../widgets/admin_sidebar.dart';
+import 'admin_destinations_screen.dart';
+import 'category_management_screen.dart';
 
 class AdminPanelScreen extends StatefulWidget {
   const AdminPanelScreen({super.key});
@@ -17,7 +19,7 @@ class AdminPanelScreen extends StatefulWidget {
 }
 
 class _AdminPanelScreenState extends State<AdminPanelScreen> {
-  int _selectedIndex = 3; // Submissions tab active by default
+  int _selectedIndex = 3;
 
   @override
   void initState() {
@@ -25,6 +27,14 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<AdminProvider>().loadPending();
     });
+  }
+
+  void _onSelect(int index) {
+    if (index == 4) {
+      Navigator.pushReplacementNamed(context, '/home');
+      return;
+    }
+    setState(() => _selectedIndex = index);
   }
 
   @override
@@ -42,61 +52,97 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
           child: AdminSidebar(
             selectedIndex: _selectedIndex,
             onSelect: (i) {
-              setState(() => _selectedIndex = i);
+              _onSelect(i);
               Navigator.pop(context);
             },
           ),
         ),
-        body: _content(),
+        body: SingleChildScrollView(child: _content()),
       );
     }
 
     return Scaffold(
       body: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           SizedBox(
             width: 220,
-            child: AdminSidebar(
-              selectedIndex: _selectedIndex,
-              onSelect: (i) => setState(() => _selectedIndex = i),
-            ),
+            child: AdminSidebar(selectedIndex: _selectedIndex, onSelect: _onSelect),
           ),
-          Expanded(child: _content()),
+          Expanded(child: SingleChildScrollView(child: _content())),
         ],
       ),
     );
   }
 
   Widget _content() {
+    switch (_selectedIndex) {
+      case 1:
+        return const AdminDestinationsScreen();
+      case 2:
+        return const CategoryManagementScreen();
+      case 3:
+        return _submissionsContent();
+      case 0:
+      default:
+        return _dashboardContent();
+    }
+  }
+
+  Widget _dashboardContent() {
+    return Padding(
+      padding: const EdgeInsets.all(AppSpacing.lg),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('Dashboard', style: AppTextStyles.heading2),
+          const SizedBox(height: AppSpacing.md),
+          const Text(
+            'Use the sidebar to manage destinations, categories, and pending submissions.',
+            style: TextStyle(color: AppColors.textSecondary),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _submissionsContent() {
     final provider = context.watch<AdminProvider>();
     final isMobile = ResponsiveLayout.isMobile(context);
 
-    return SingleChildScrollView(
+    return Padding(
       padding: const EdgeInsets.all(AppSpacing.lg),
-      child: StateView<List<DestinationModel>>(
-        state: provider.pendingState,
-        onRetry: () => provider.loadPending(),
-        builder: (context, submissions) {
-          return GridView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            itemCount: submissions.length,
-            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: isMobile ? 1 : 3,
-              crossAxisSpacing: AppSpacing.md,
-              mainAxisSpacing: AppSpacing.md,
-              childAspectRatio: isMobile ? 1.6 : 1.1,
-            ),
-            itemBuilder: (context, index) {
-              final s = submissions[index];
-              return _SubmissionCard(
-                destination: s,
-                onApprove: () => provider.approve(s.id),
-                onReject: () => provider.reject(s.id),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('Pending submissions', style: AppTextStyles.heading2),
+          const SizedBox(height: AppSpacing.lg),
+          StateView<List<DestinationModel>>(
+            state: provider.pendingState,
+            onRetry: () => provider.loadPending(),
+            builder: (context, submissions) {
+              return GridView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: submissions.length,
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: isMobile ? 1 : 3,
+                  crossAxisSpacing: AppSpacing.md,
+                  mainAxisSpacing: AppSpacing.md,
+                  childAspectRatio: isMobile ? 1.6 : 1.1,
+                ),
+                itemBuilder: (context, index) {
+                  final s = submissions[index];
+                  return _SubmissionCard(
+                    destination: s,
+                    onApprove: () => provider.approve(s.id),
+                    onReject: () => provider.reject(s.id),
+                  );
+                },
               );
             },
-          );
-        },
+          ),
+        ],
       ),
     );
   }
@@ -128,17 +174,6 @@ class _SubmissionCard extends StatelessWidget {
           Text(destination.name,
               style: AppTextStyles.label.copyWith(color: AppColors.primary, fontSize: 16)),
           const SizedBox(height: AppSpacing.xs),
-          Row(
-            children: List.generate(
-              5,
-                  (i) => Icon(
-                i < destination.averageRating.round() ? Icons.star : Icons.star_border,
-                color: AppColors.primary,
-                size: 16,
-              ),
-            ),
-          ),
-          const SizedBox(height: AppSpacing.sm),
           Text(
             destination.shortDescription,
             style: AppTextStyles.bodyMedium,

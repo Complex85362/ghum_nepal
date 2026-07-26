@@ -10,8 +10,8 @@ class AdminSidebar extends StatelessWidget {
 
   static const _items = [
     ('Dashboard', Icons.dashboard_outlined),
-    ('Destination', Icons.map_outlined),
-    ('Reviews', Icons.star_outline),
+    ('Destinations', Icons.map_outlined),
+    ('Categories', Icons.category_outlined),
     ('Submissions', Icons.inbox_outlined),
     ('Home Page', Icons.home_outlined),
   ];

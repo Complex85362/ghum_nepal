@@ -20,11 +20,19 @@ class ReviewRepository {
     }
   }
 
-  Future<void> addReview(ReviewModel review) async {
+  Future<void> addOrUpdateReview(ReviewModel review) async {
     try {
-      await _collection.add(review.toMap());
+      await _collection.doc(review.id).set(review.toMap());
     } catch (_) {
       throw const Failure('Could not submit review.');
+    }
+  }
+
+  Future<void> deleteReview(String userId, String destinationId) async {
+    try {
+      await _collection.doc('${userId}_$destinationId').delete();
+    } catch (_) {
+      throw const Failure('Could not delete review.');
     }
   }
 }

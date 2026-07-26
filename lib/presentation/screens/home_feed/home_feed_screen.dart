@@ -1,12 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/widgets/responsive_layout.dart';
+import '../../../core/widgets/max_width_box.dart';
+import '../../../core/widgets/state_view.dart';
+import '../../../data/models/category_model.dart';
+import '../../providers/category_provider.dart';
 import '../../widgets/app_top_nav.dart';
 import '../../widgets/destination_card.dart';
 import 'category_screen.dart';
-
 
 class HomeFeedScreen extends StatefulWidget {
   const HomeFeedScreen({super.key});
@@ -16,13 +20,6 @@ class HomeFeedScreen extends StatefulWidget {
 }
 
 class _HomeFeedScreenState extends State<HomeFeedScreen> {
-  final _exploreCategories = const [
-    {'title': 'Hikes', 'category': 'hikes', 'image': 'https://images.unsplash.com/photo-1551632811-561732d1e306'},
-    {'title': 'Food Spots', 'category': 'food', 'image': 'https://images.unsplash.com/photo-1504674900247-0877df9cc836'},
-    {'title': 'View Points', 'category': 'viewpoints', 'image': 'https://images.unsplash.com/photo-1544735716-392fe2489ffa'},
-    {'title': 'Lakes', 'category': 'lakes', 'image': 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4'},
-  ];
-
   final _cities = const [
     {'title': 'Kathmandu', 'image': 'https://images.unsplash.com/photo-1553912780-13f39a5cabdf'},
     {'title': 'Pokhara', 'image': 'https://images.unsplash.com/photo-1544735716-392fe2489ffa'},
@@ -31,62 +28,67 @@ class _HomeFeedScreenState extends State<HomeFeedScreen> {
   ];
 
   @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<CategoryProvider>().loadCategories();
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     final isMobile = ResponsiveLayout.isMobile(context);
+    final hPad = isMobile ? AppSpacing.md : AppSpacing.xl;
+
     return Scaffold(
       appBar: const AppTopNav(),
       body: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _heroBanner(isMobile),
-            Padding(
-              padding: const EdgeInsets.all(AppSpacing.md),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text('Explore Nepal', style: AppTextStyles.heading2),
-                  const SizedBox(height: AppSpacing.md),
-                  _categoryGrid(isMobile),
-                  const SizedBox(height: AppSpacing.md),
-                  Center(
-                    child: ElevatedButton(
-                      onPressed: () => Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => const CategoryScreen(category: 'hikes', title: 'Hikes'),
-                        ),
+        child: MaxWidthBox(
+          maxWidth: 1280,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: EdgeInsets.all(hPad),
+                child: _heroBanner(isMobile),
+              ),
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: hPad),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Explore Nepal', style: AppTextStyles.heading2),
+                    const SizedBox(height: AppSpacing.lg),
+                    _categoryGrid(isMobile),
+                  ],
+                ),
+              ),
+              Padding(
+                padding: EdgeInsets.all(hPad),
+                child: _knowPlacesBanner(isMobile),
+              ),
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: hPad),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Discover the cities of Nepal', style: AppTextStyles.heading2),
+                    const SizedBox(height: AppSpacing.lg),
+                    _cityGrid(isMobile),
+                    const SizedBox(height: AppSpacing.lg),
+                    Center(
+                      child: ElevatedButton(
+                        onPressed: () {},
+                        child: const Text('View More'),
                       ),
-                      child: const Text('View More'),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-            const SizedBox(height: AppSpacing.md),
-            _knowPlacesBanner(isMobile),
-            const SizedBox(height: AppSpacing.md),
-            Padding(
-              padding: const EdgeInsets.all(AppSpacing.md),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text('Discover the cities of Nepal', style: AppTextStyles.heading2),
-                  const SizedBox(height: AppSpacing.md),
-                  _cityGrid(isMobile),
-                  const SizedBox(height: AppSpacing.md),
-                  Center(
-                    child: ElevatedButton(
-                      onPressed: () {},
-                      child: const Text('View More'),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: AppSpacing.xl),
-            _footer(),
-          ],
+              const SizedBox(height: AppSpacing.xxl),
+              _footer(hPad),
+            ],
+          ),
         ),
       ),
     );
@@ -94,8 +96,7 @@ class _HomeFeedScreenState extends State<HomeFeedScreen> {
 
   Widget _heroBanner(bool isMobile) {
     return Container(
-      margin: const EdgeInsets.all(AppSpacing.md),
-      padding: const EdgeInsets.all(AppSpacing.lg),
+      padding: const EdgeInsets.all(AppSpacing.xl),
       decoration: BoxDecoration(
         color: AppColors.primary,
         borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
@@ -114,33 +115,26 @@ class _HomeFeedScreenState extends State<HomeFeedScreen> {
                 const SizedBox(height: AppSpacing.sm),
                 Text('Experience the true beauty of Nepal Upclose!!',
                     style: AppTextStyles.subtitle),
-                const SizedBox(height: AppSpacing.md),
+                const SizedBox(height: AppSpacing.lg),
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.white,
                     foregroundColor: AppColors.primary,
                   ),
-                  onPressed: () => Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => const CategoryScreen(category: 'hikes', title: 'Hikes'),
-                    ),
-                  ),
+                  onPressed: () {},
                   child: const Text('Discover'),
                 ),
-
-
               ],
             ),
           ),
-          SizedBox(height: isMobile ? AppSpacing.md : 0, width: isMobile ? 0 : AppSpacing.lg),
+          SizedBox(height: isMobile ? AppSpacing.lg : 0, width: isMobile ? 0 : AppSpacing.xl),
           Expanded(
             flex: isMobile ? 0 : 1,
             child: ClipRRect(
               borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
               child: Image.network(
                 'https://images.unsplash.com/photo-1544735716-392fe2489ffa',
-                height: isMobile ? 200 : 260,
+                height: isMobile ? 200 : 280,
                 width: double.infinity,
                 fit: BoxFit.cover,
               ),
@@ -153,8 +147,7 @@ class _HomeFeedScreenState extends State<HomeFeedScreen> {
 
   Widget _knowPlacesBanner(bool isMobile) {
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
-      padding: const EdgeInsets.all(AppSpacing.lg),
+      padding: const EdgeInsets.all(AppSpacing.xl),
       decoration: BoxDecoration(
         color: AppColors.primary,
         borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
@@ -168,13 +161,13 @@ class _HomeFeedScreenState extends State<HomeFeedScreen> {
               borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
               child: Image.network(
                 'https://images.unsplash.com/photo-1544735716-392fe2489ffa',
-                height: isMobile ? 180 : 220,
+                height: isMobile ? 180 : 240,
                 width: double.infinity,
                 fit: BoxFit.cover,
               ),
             ),
           ),
-          SizedBox(height: isMobile ? AppSpacing.md : 0, width: isMobile ? 0 : AppSpacing.lg),
+          SizedBox(height: isMobile ? AppSpacing.lg : 0, width: isMobile ? 0 : AppSpacing.xl),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -183,7 +176,7 @@ class _HomeFeedScreenState extends State<HomeFeedScreen> {
                 Text('Know Places?', style: AppTextStyles.heading1.copyWith(color: Colors.white)),
                 const SizedBox(height: AppSpacing.sm),
                 Text('Publish your own stories and experiences', style: AppTextStyles.subtitle),
-                const SizedBox(height: AppSpacing.md),
+                const SizedBox(height: AppSpacing.lg),
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.white,
@@ -205,47 +198,49 @@ class _HomeFeedScreenState extends State<HomeFeedScreen> {
   }
 
   Widget _categoryGrid(bool isMobile) {
-    final crossAxisCount = isMobile ? 2 : 4;
-    return GridView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      itemCount: _exploreCategories.length,
-      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: crossAxisCount,
-        crossAxisSpacing: AppSpacing.sm,
-        mainAxisSpacing: AppSpacing.sm,
-        childAspectRatio: 1,
-      ),
-      itemBuilder: (context, index) {
-        final item = _exploreCategories[index];
-        return DestinationCard(
-          imageUrl: item['image']!,
-          title: item['title']!,
-          height: double.infinity,
-          onTap: () => Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (_) => CategoryScreen(
-                category: item['category']!,
-                title: item['title']!,
-              ),
-            ),
+    final provider = context.watch<CategoryProvider>();
+    return StateView<List<CategoryModel>>(
+      state: provider.categoriesState,
+      onRetry: () => provider.loadCategories(),
+      builder: (context, categories) {
+        return GridView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          itemCount: categories.length,
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: isMobile ? 2 : 4,
+            crossAxisSpacing: AppSpacing.md,
+            mainAxisSpacing: AppSpacing.md,
+            childAspectRatio: 1,
           ),
+          itemBuilder: (context, index) {
+            final c = categories[index];
+            return DestinationCard(
+              imageUrl: c.coverImageUrl,
+              title: c.name,
+              height: double.infinity,
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => CategoryScreen(categoryId: c.id, title: c.name),
+                ),
+              ),
+            );
+          },
         );
       },
     );
   }
 
   Widget _cityGrid(bool isMobile) {
-    final crossAxisCount = isMobile ? 2 : 4;
     return GridView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       itemCount: _cities.length,
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: crossAxisCount,
-        crossAxisSpacing: AppSpacing.sm,
-        mainAxisSpacing: AppSpacing.sm,
+        crossAxisCount: isMobile ? 2 : 4,
+        crossAxisSpacing: AppSpacing.md,
+        mainAxisSpacing: AppSpacing.md,
         childAspectRatio: 1,
       ),
       itemBuilder: (context, index) {
@@ -260,16 +255,16 @@ class _HomeFeedScreenState extends State<HomeFeedScreen> {
     );
   }
 
-  Widget _footer() {
+  Widget _footer(double hPad) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(AppSpacing.lg),
+      padding: EdgeInsets.symmetric(horizontal: hPad, vertical: AppSpacing.xl),
       decoration: const BoxDecoration(
         border: Border(top: BorderSide(color: AppColors.divider)),
       ),
       child: Wrap(
-        spacing: AppSpacing.xl,
-        runSpacing: AppSpacing.md,
+        spacing: AppSpacing.xxl,
+        runSpacing: AppSpacing.lg,
         children: [
           _footerColumn('Find Us', ['Our locations', 'Contact Us']),
           _footerColumn('About us', ['Our Story', 'Our Products']),

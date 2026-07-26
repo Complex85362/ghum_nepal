@@ -1,6 +1,7 @@
 class ReviewModel {
   final String id;
   final String destinationId;
+  final String userId;
   final String reviewerName;
   final int rating;
   final String comment;
@@ -9,6 +10,7 @@ class ReviewModel {
   ReviewModel({
     required this.id,
     required this.destinationId,
+    required this.userId,
     required this.reviewerName,
     required this.rating,
     required this.comment,
@@ -19,6 +21,7 @@ class ReviewModel {
     return ReviewModel(
       id: id,
       destinationId: map['destinationId'] ?? '',
+      userId: map['userId'] ?? '',
       reviewerName: map['reviewerName'] ?? 'Anonymous',
       rating: map['rating'] ?? 0,
       comment: map['comment'] ?? '',
@@ -31,6 +34,7 @@ class ReviewModel {
   Map<String, dynamic> toMap() {
     return {
       'destinationId': destinationId,
+      'userId': userId,
       'reviewerName': reviewerName,
       'rating': rating,
       'comment': comment,

@@ -3,6 +3,7 @@ import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/widgets/responsive_layout.dart';
 import '../screens/home_feed/search_screen.dart';
+import '../screens/profile/wishlist_screen.dart';
 
 class AppTopNav extends StatelessWidget implements PreferredSizeWidget {
   final VoidCallback? onMenuTap;
@@ -14,8 +15,8 @@ class AppTopNav extends StatelessWidget implements PreferredSizeWidget {
     final isMobile = ResponsiveLayout.isMobile(context);
     return SafeArea(
       child: Padding(
-        padding: const EdgeInsets.symmetric(
-          horizontal: AppSpacing.md,
+        padding: EdgeInsets.symmetric(
+          horizontal: isMobile ? AppSpacing.md : AppSpacing.xl,
           vertical: AppSpacing.sm,
         ),
         child: Row(
@@ -46,7 +47,7 @@ class AppTopNav extends StatelessWidget implements PreferredSizeWidget {
                 onPressed: () => Navigator.pushNamed(context, '/home'),
                 child: const Text('Discover', style: TextStyle(color: AppColors.primary)),
               ),
-              const SizedBox(width: AppSpacing.sm),
+              const SizedBox(width: AppSpacing.md),
             ],
             GestureDetector(
               onTap: () => Navigator.push(
@@ -75,11 +76,13 @@ class AppTopNav extends StatelessWidget implements PreferredSizeWidget {
               ),
             ),
             const SizedBox(width: AppSpacing.sm),
-            if (!isMobile)
-              IconButton(
-                icon: const Icon(Icons.bookmark_border, color: AppColors.primary),
-                onPressed: () {},
+            IconButton(
+              icon: const Icon(Icons.bookmark_border, color: AppColors.primary),
+              onPressed: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const WishlistScreen()),
               ),
+            ),
             IconButton(
               icon: const Icon(Icons.person_outline, color: AppColors.primary),
               onPressed: () => Navigator.pushNamed(context, '/profile'),

@@ -14,7 +14,8 @@ import 'presentation/screens/profile/profile_screen.dart';
 import 'presentation/screens/admin/admin_panel_screen.dart';
 import 'data/repositories/category_repository.dart';
 import 'presentation/providers/category_provider.dart';
-
+import 'data/repositories/review_repository.dart';
+import 'presentation/providers/review_provider.dart';
 class GhumNepalApp extends StatelessWidget {
   const GhumNepalApp({super.key});
 
@@ -26,6 +27,13 @@ class GhumNepalApp extends StatelessWidget {
         Provider(create: (_) => DestinationRepository()),
         Provider(create: (_) => WishlistRepository()),
         Provider(create: (_) => CategoryRepository()),
+        Provider(create: (_) => ReviewRepository()),
+        ChangeNotifierProvider(
+          create: (context) => ReviewProvider(
+            context.read<ReviewRepository>(),
+            context.read<DestinationRepository>(),
+          ),
+        ),
         ChangeNotifierProvider(
           create: (context) => CategoryProvider(context.read<CategoryRepository>()),
         ),

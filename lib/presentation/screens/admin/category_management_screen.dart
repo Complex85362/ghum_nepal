@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_text_styles.dart';
+import '../../../core/widgets/max_width_box.dart';
 import '../../../core/widgets/state_view.dart';
 import '../../../data/models/category_model.dart';
 import '../../providers/category_provider.dart';
@@ -34,111 +35,117 @@ class _CategoryManagementScreenState extends State<CategoryManagementScreen> {
   @override
   Widget build(BuildContext context) {
     final provider = context.watch<CategoryProvider>();
-    return Padding(
-      padding: const EdgeInsets.all(AppSpacing.lg),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text('Categories', style: AppTextStyles.heading2),
-              ElevatedButton.icon(
-                onPressed: () => _openForm(),
-                icon: const Icon(Icons.add, size: 18),
-                label: const Text('Add Category'),
-              ),
-            ],
-          ),
-          const SizedBox(height: AppSpacing.lg),
-          StateView<List<CategoryModel>>(
-            state: provider.categoriesState,
-            onRetry: () => provider.loadCategories(),
-            builder: (context, categories) {
-              return GridView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                itemCount: categories.length,
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 3,
-                  crossAxisSpacing: AppSpacing.md,
-                  mainAxisSpacing: AppSpacing.md,
-                  childAspectRatio: 1.3,
+    return MaxWidthBox(
+      maxWidth: 1000,
+      child: Padding(
+        padding: const EdgeInsets.all(AppSpacing.xl),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text('Categories', style: AppTextStyles.heading2),
+                ElevatedButton.icon(
+                  onPressed: () => _openForm(),
+                  icon: const Icon(Icons.add, size: 18),
+                  label: const Text('Add Category'),
                 ),
-                itemBuilder: (context, index) {
-                  final c = categories[index];
-                  return Container(
-                    decoration: BoxDecoration(
-                      border: Border.all(color: AppColors.border),
-                      borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        ClipRRect(
-                          borderRadius:
-                          const BorderRadius.vertical(top: Radius.circular(AppSpacing.radiusSm)),
-                          child: Image.network(
-                            c.coverImageUrl,
-                            height: 80,
-                            width: double.infinity,
-                            fit: BoxFit.cover,
-                            errorBuilder: (c2, e, s) => Container(height: 80, color: AppColors.divider),
+              ],
+            ),
+            const SizedBox(height: AppSpacing.xl),
+            StateView<List<CategoryModel>>(
+              state: provider.categoriesState,
+              onRetry: () => provider.loadCategories(),
+              builder: (context, categories) {
+                return GridView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: categories.length,
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 3,
+                    crossAxisSpacing: AppSpacing.lg,
+                    mainAxisSpacing: AppSpacing.lg,
+                    childAspectRatio: 1.3,
+                  ),
+                  itemBuilder: (context, index) {
+                    final c = categories[index];
+                    return Container(
+                      decoration: BoxDecoration(
+                        border: Border.all(color: AppColors.border),
+                        borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          ClipRRect(
+                            borderRadius: const BorderRadius.vertical(
+                                top: Radius.circular(AppSpacing.radiusSm)),
+                            child: Image.network(
+                              c.coverImageUrl,
+                              height: 90,
+                              width: double.infinity,
+                              fit: BoxFit.cover,
+                              errorBuilder: (c2, e, s) =>
+                                  Container(height: 90, color: AppColors.divider),
+                            ),
                           ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.all(AppSpacing.sm),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Expanded(
-                                child: Text(c.name,
-                                    style: AppTextStyles.label, overflow: TextOverflow.ellipsis),
-                              ),
-                              IconButton(
-                                icon: const Icon(Icons.edit, size: 16, color: AppColors.primary),
-                                onPressed: () => _openForm(existing: c),
-                                padding: EdgeInsets.zero,
-                                constraints: const BoxConstraints(),
-                              ),
-                              const SizedBox(width: AppSpacing.xs),
-                              IconButton(
-                                icon: const Icon(Icons.delete_outline, size: 16, color: AppColors.error),
-                                onPressed: () async {
-                                  final confirm = await showDialog<bool>(
-                                    context: context,
-                                    builder: (_) => AlertDialog(
-                                      title: const Text('Delete category?'),
-                                      content: Text(
-                                          'This will not delete destinations already assigned to "${c.name}".'),
-                                      actions: [
-                                        TextButton(
-                                            onPressed: () => Navigator.pop(context, false),
-                                            child: const Text('Cancel')),
-                                        TextButton(
-                                            onPressed: () => Navigator.pop(context, true),
-                                            child: const Text('Delete')),
-                                      ],
-                                    ),
-                                  );
-                                  if (confirm == true) {
-                                    await context.read<CategoryProvider>().deleteCategory(c.id);
-                                  }
-                                },
-                                padding: EdgeInsets.zero,
-                                constraints: const BoxConstraints(),
-                              ),
-                            ],
+                          Padding(
+                            padding: const EdgeInsets.all(AppSpacing.md),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Expanded(
+                                  child: Text(c.name,
+                                      style: AppTextStyles.label,
+                                      overflow: TextOverflow.ellipsis),
+                                ),
+                                IconButton(
+                                  icon: const Icon(Icons.edit, size: 16, color: AppColors.primary),
+                                  onPressed: () => _openForm(existing: c),
+                                  padding: EdgeInsets.zero,
+                                  constraints: const BoxConstraints(),
+                                ),
+                                const SizedBox(width: AppSpacing.sm),
+                                IconButton(
+                                  icon: const Icon(Icons.delete_outline,
+                                      size: 16, color: AppColors.error),
+                                  onPressed: () async {
+                                    final confirm = await showDialog<bool>(
+                                      context: context,
+                                      builder: (_) => AlertDialog(
+                                        title: const Text('Delete category?'),
+                                        content: Text(
+                                            'This will not delete destinations already assigned to "${c.name}".'),
+                                        actions: [
+                                          TextButton(
+                                              onPressed: () => Navigator.pop(context, false),
+                                              child: const Text('Cancel')),
+                                          TextButton(
+                                              onPressed: () => Navigator.pop(context, true),
+                                              child: const Text('Delete')),
+                                        ],
+                                      ),
+                                    );
+                                    if (confirm == true) {
+                                      await context.read<CategoryProvider>().deleteCategory(c.id);
+                                    }
+                                  },
+                                  padding: EdgeInsets.zero,
+                                  constraints: const BoxConstraints(),
+                                ),
+                              ],
+                            ),
                           ),
-                        ),
-                      ],
-                    ),
-                  );
-                },
-              );
-            },
-          ),
-        ],
+                        ],
+                      ),
+                    );
+                  },
+                );
+              },
+            ),
+          ],
+        ),
       ),
     );
   }

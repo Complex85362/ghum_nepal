@@ -16,6 +16,7 @@ import 'data/repositories/category_repository.dart';
 import 'presentation/providers/category_provider.dart';
 import 'data/repositories/review_repository.dart';
 import 'presentation/providers/review_provider.dart';
+import 'presentation/screens/submission/submission_form_screen.dart';
 class GhumNepalApp extends StatelessWidget {
   const GhumNepalApp({super.key});
 
@@ -63,6 +64,7 @@ class GhumNepalApp extends StatelessWidget {
           '/home': (context) => const HomeFeedScreen(),
           '/profile': (context) => const ProfileScreen(),
           '/admin': (context) => const AdminPanelScreen(),
+          '/submit': (context) => const SubmissionFormScreen(),
         },
       ),
     );

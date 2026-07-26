@@ -40,7 +40,7 @@ class AppTopNav extends StatelessWidget implements PreferredSizeWidget {
             const Spacer(),
             if (!isMobile) ...[
               TextButton(
-                onPressed: () {},
+                onPressed: () => Navigator.pushNamed(context, '/submit'),
                 child: const Text('Submit', style: TextStyle(color: AppColors.primary)),
               ),
               TextButton(

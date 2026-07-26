@@ -1,38 +1,60 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/widgets/responsive_layout.dart';
 import '../../../core/widgets/max_width_box.dart';
-import '../../../core/widgets/state_view.dart';
-import '../../../data/models/category_model.dart';
-import '../../providers/category_provider.dart';
+import '../../../data/models/destination_model.dart';
+import '../../../data/repositories/destination_repository.dart';
 import '../../widgets/app_top_nav.dart';
-import '../../widgets/destination_card.dart';
-import 'category_screen.dart';
+import '../destination_detail/destination_detail_screen.dart';
 
-class HomeFeedScreen extends StatefulWidget {
-  const HomeFeedScreen({super.key});
+class SearchScreen extends StatefulWidget {
+  const SearchScreen({super.key});
 
   @override
-  State<HomeFeedScreen> createState() => _HomeFeedScreenState();
+  State<SearchScreen> createState() => _SearchScreenState();
 }
 
-class _HomeFeedScreenState extends State<HomeFeedScreen> {
-  final _cities = const [
-    {'title': 'Kathmandu', 'image': 'https://images.unsplash.com/photo-1553912780-13f39a5cabdf'},
-    {'title': 'Pokhara', 'image': 'https://images.unsplash.com/photo-1544735716-392fe2489ffa'},
-    {'title': 'Chitwan', 'image': 'https://images.unsplash.com/photo-1549366021-9f761d450615'},
-    {'title': 'Lumbini', 'image': 'https://images.unsplash.com/photo-1580500550469-9b5e70b4fd4e'},
-  ];
+class _SearchScreenState extends State<SearchScreen> {
+  final _repository = DestinationRepository();
+  final _controller = TextEditingController();
+  List<DestinationModel> _results = [];
+  bool _loading = false;
+  String? _error;
+  bool _searched = false;
+
+  Future<void> _search(String query) async {
+    if (query.trim().isEmpty) {
+      setState(() {
+        _results = [];
+        _searched = false;
+      });
+      return;
+    }
+    setState(() {
+      _loading = true;
+      _error = null;
+      _searched = true;
+    });
+    try {
+      final results = await _repository.search(query.trim());
+      setState(() {
+        _results = results;
+        _loading = false;
+      });
+    } catch (e) {
+      setState(() {
+        _error = 'Search failed. Please try again.';
+        _loading = false;
+      });
+    }
+  }
 
   @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<CategoryProvider>().loadCategories();
-    });
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
   }
 
   @override
@@ -42,250 +64,82 @@ class _HomeFeedScreenState extends State<HomeFeedScreen> {
 
     return Scaffold(
       appBar: const AppTopNav(),
-      body: SingleChildScrollView(
-        child: MaxWidthBox(
-          maxWidth: 1280,
+      body: MaxWidthBox(
+        maxWidth: 900,
+        child: Padding(
+          padding: EdgeInsets.symmetric(horizontal: hPad, vertical: AppSpacing.lg),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Padding(
-                padding: EdgeInsets.all(hPad),
-                child: _heroBanner(isMobile),
-              ),
-              Padding(
-                padding: EdgeInsets.symmetric(horizontal: hPad),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('Explore Nepal', style: AppTextStyles.heading2),
-                    const SizedBox(height: AppSpacing.lg),
-                    _categoryGrid(isMobile),
-                  ],
+              TextField(
+                controller: _controller,
+                autofocus: true,
+                onSubmitted: _search,
+                decoration: InputDecoration(
+                  hintText: 'Search destinations...',
+                  prefixIcon: const Icon(Icons.search),
+                  suffixIcon: IconButton(
+                    icon: const Icon(Icons.arrow_forward),
+                    onPressed: () => _search(_controller.text),
+                  ),
                 ),
               ),
-              Padding(
-                padding: EdgeInsets.all(hPad),
-                child: _knowPlacesBanner(isMobile),
-              ),
-              Padding(
-                padding: EdgeInsets.symmetric(horizontal: hPad),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('Discover the cities of Nepal', style: AppTextStyles.heading2),
-                    const SizedBox(height: AppSpacing.lg),
-                    _cityGrid(isMobile),
-                    const SizedBox(height: AppSpacing.lg),
-                    Center(
-                      child: ElevatedButton(
-                        onPressed: () {},
-                        child: const Text('View More'),
+              const SizedBox(height: AppSpacing.xl),
+              if (_loading)
+                const Center(child: CircularProgressIndicator(color: AppColors.primary))
+              else if (_error != null)
+                Center(child: Text(_error!, style: const TextStyle(color: AppColors.error)))
+              else if (_searched && _results.isEmpty)
+                  const Center(
+                    child: Padding(
+                      padding: EdgeInsets.only(top: AppSpacing.xl),
+                      child: Text('No destinations found.'),
+                    ),
+                  )
+                else if (_results.isNotEmpty)
+                    Expanded(
+                      child: GridView.builder(
+                        itemCount: _results.length,
+                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: isMobile ? 1 : 3,
+                          crossAxisSpacing: AppSpacing.lg,
+                          mainAxisSpacing: AppSpacing.lg,
+                          childAspectRatio: isMobile ? 2.5 : 1,
+                        ),
+                        itemBuilder: (context, index) {
+                          final d = _results[index];
+                          return Container(
+                            decoration: BoxDecoration(
+                              border: Border.all(color: AppColors.divider),
+                              borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
+                            ),
+                            child: ListTile(
+                              contentPadding: const EdgeInsets.all(AppSpacing.sm),
+                              leading: ClipRRect(
+                                borderRadius: BorderRadius.circular(6),
+                                child: Image.network(d.coverImageUrl,
+                                    width: 56, height: 56, fit: BoxFit.cover,
+                                    errorBuilder: (c, e, s) =>
+                                        Container(width: 56, height: 56, color: AppColors.divider)),
+                              ),
+                              title: Text(d.name, style: AppTextStyles.label),
+                              subtitle: Text(d.shortDescription,
+                                  maxLines: 1, overflow: TextOverflow.ellipsis),
+                              onTap: () => Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => DestinationDetailScreen(destinationId: d.id),
+                                ),
+                              ),
+                            ),
+                          );
+                        },
                       ),
                     ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: AppSpacing.xxl),
-              _footer(hPad),
             ],
           ),
         ),
       ),
-    );
-  }
-
-  Widget _heroBanner(bool isMobile) {
-    return Container(
-      padding: const EdgeInsets.all(AppSpacing.xl),
-      decoration: BoxDecoration(
-        color: AppColors.primary,
-        borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-      ),
-      child: Flex(
-        direction: isMobile ? Axis.vertical : Axis.horizontal,
-        crossAxisAlignment: isMobile ? CrossAxisAlignment.start : CrossAxisAlignment.center,
-        children: [
-          Expanded(
-            flex: isMobile ? 0 : 1,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text('Nepal at your FingerTips', style: AppTextStyles.displayLarge),
-                const SizedBox(height: AppSpacing.sm),
-                Text('Experience the true beauty of Nepal Upclose!!',
-                    style: AppTextStyles.subtitle),
-                const SizedBox(height: AppSpacing.lg),
-                ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.white,
-                    foregroundColor: AppColors.primary,
-                  ),
-                  onPressed: () {},
-                  child: const Text('Discover'),
-                ),
-              ],
-            ),
-          ),
-          SizedBox(height: isMobile ? AppSpacing.lg : 0, width: isMobile ? 0 : AppSpacing.xl),
-          Expanded(
-            flex: isMobile ? 0 : 1,
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-              child: Image.network(
-                'https://images.unsplash.com/photo-1544735716-392fe2489ffa',
-                height: isMobile ? 200 : 280,
-                width: double.infinity,
-                fit: BoxFit.cover,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _knowPlacesBanner(bool isMobile) {
-    return Container(
-      padding: const EdgeInsets.all(AppSpacing.xl),
-      decoration: BoxDecoration(
-        color: AppColors.primary,
-        borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-      ),
-      child: Flex(
-        direction: isMobile ? Axis.vertical : Axis.horizontal,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Expanded(
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-              child: Image.network(
-                'https://images.unsplash.com/photo-1544735716-392fe2489ffa',
-                height: isMobile ? 180 : 240,
-                width: double.infinity,
-                fit: BoxFit.cover,
-              ),
-            ),
-          ),
-          SizedBox(height: isMobile ? AppSpacing.lg : 0, width: isMobile ? 0 : AppSpacing.xl),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text('Know Places?', style: AppTextStyles.heading1.copyWith(color: Colors.white)),
-                const SizedBox(height: AppSpacing.sm),
-                Text('Publish your own stories and experiences', style: AppTextStyles.subtitle),
-                const SizedBox(height: AppSpacing.lg),
-                ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.white,
-                    foregroundColor: AppColors.primary,
-                  ),
-                  onPressed: () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Submission form coming next.')),
-                    );
-                  },
-                  child: const Text('Publish'),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _categoryGrid(bool isMobile) {
-    final provider = context.watch<CategoryProvider>();
-    return StateView<List<CategoryModel>>(
-      state: provider.categoriesState,
-      onRetry: () => provider.loadCategories(),
-      builder: (context, categories) {
-        return GridView.builder(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          itemCount: categories.length,
-          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: isMobile ? 2 : 4,
-            crossAxisSpacing: AppSpacing.md,
-            mainAxisSpacing: AppSpacing.md,
-            childAspectRatio: 1,
-          ),
-          itemBuilder: (context, index) {
-            final c = categories[index];
-            return DestinationCard(
-              imageUrl: c.coverImageUrl,
-              title: c.name,
-              height: double.infinity,
-              onTap: () => Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => CategoryScreen(categoryId: c.id, title: c.name),
-                ),
-              ),
-            );
-          },
-        );
-      },
-    );
-  }
-
-  Widget _cityGrid(bool isMobile) {
-    return GridView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      itemCount: _cities.length,
-      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: isMobile ? 2 : 4,
-        crossAxisSpacing: AppSpacing.md,
-        mainAxisSpacing: AppSpacing.md,
-        childAspectRatio: 1,
-      ),
-      itemBuilder: (context, index) {
-        final item = _cities[index];
-        return DestinationCard(
-          imageUrl: item['image']!,
-          title: item['title']!,
-          height: double.infinity,
-          onTap: () {},
-        );
-      },
-    );
-  }
-
-  Widget _footer(double hPad) {
-    return Container(
-      width: double.infinity,
-      padding: EdgeInsets.symmetric(horizontal: hPad, vertical: AppSpacing.xl),
-      decoration: const BoxDecoration(
-        border: Border(top: BorderSide(color: AppColors.divider)),
-      ),
-      child: Wrap(
-        spacing: AppSpacing.xxl,
-        runSpacing: AppSpacing.lg,
-        children: [
-          _footerColumn('Find Us', ['Our locations', 'Contact Us']),
-          _footerColumn('About us', ['Our Story', 'Our Products']),
-          _footerColumn('Our Terms & Conditions', ['Terms of delivery', 'Privacy Setting']),
-        ],
-      ),
-    );
-  }
-
-  Widget _footerColumn(String title, List<String> items) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Text(title, style: AppTextStyles.label.copyWith(fontWeight: FontWeight.bold)),
-        const SizedBox(height: AppSpacing.sm),
-        ...items.map((i) => Padding(
-          padding: const EdgeInsets.only(bottom: AppSpacing.xs),
-          child: Text(i, style: AppTextStyles.caption),
-        )),
-      ],
     );
   }
 }

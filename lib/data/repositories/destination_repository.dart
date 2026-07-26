@@ -9,6 +9,7 @@ class DestinationRepository {
   Future<List<DestinationModel>> getFeatured() async {
     try {
       final snapshot = await _collection
+          .where('approved', isEqualTo: true)
           .where('isFeatured', isEqualTo: true)
           .limit(10)
           .get();
@@ -20,10 +21,11 @@ class DestinationRepository {
     }
   }
 
-  Future<List<DestinationModel>> getByCategory(String category, {int limit = 20}) async {
+  Future<List<DestinationModel>> getByCategory(String categoryId, {int limit = 20}) async {
     try {
       final snapshot = await _collection
-          .where('category', isEqualTo: category)
+          .where('approved', isEqualTo: true)
+          .where('categoryId', isEqualTo: categoryId)
           .limit(limit)
           .get();
       return snapshot.docs
@@ -36,7 +38,7 @@ class DestinationRepository {
 
   Future<List<DestinationModel>> search(String query) async {
     try {
-      final snapshot = await _collection.get();
+      final snapshot = await _collection.where('approved', isEqualTo: true).get();
       final all = snapshot.docs
           .map((d) => DestinationModel.fromMap(d.data() as Map<String, dynamic>, d.id))
           .toList();
@@ -58,17 +60,35 @@ class DestinationRepository {
     }
   }
 
-  Future<void> submitDestination(DestinationModel destination) async {
+  Future<String> submitDestination(DestinationModel destination) async {
     try {
-      await _collection.add({
+      final doc = await _collection.add({
         ...destination.toMap(),
         'isFeatured': false,
         'approved': false,
       });
+      return doc.id;
     } catch (_) {
       throw const Failure('Could not submit destination.');
     }
   }
+
+  Future<void> updateDestination(String id, Map<String, dynamic> data) async {
+    try {
+      await _collection.doc(id).update(data);
+    } catch (_) {
+      throw const Failure('Could not update destination.');
+    }
+  }
+
+  Future<void> deleteDestination(String id) async {
+    try {
+      await _collection.doc(id).delete();
+    } catch (_) {
+      throw const Failure('Could not delete destination.');
+    }
+  }
+
   Future<List<DestinationModel>> getPendingSubmissions() async {
     try {
       final snapshot = await _collection.where('approved', isEqualTo: false).get();
@@ -82,7 +102,7 @@ class DestinationRepository {
 
   Future<void> approveSubmission(String id) async {
     try {
-      await _collection.doc(id).update({'approved': true, 'isFeatured': false});
+      await _collection.doc(id).update({'approved': true});
     } catch (_) {
       throw const Failure('Could not approve submission.');
     }

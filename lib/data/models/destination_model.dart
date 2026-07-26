@@ -1,7 +1,8 @@
 class DestinationModel {
   final String id;
   final String name;
-  final String category; // hikes, food, viewpoints, lakes, cities, temples
+  final String categoryId;
+  final String categoryName;
   final String province;
   final String shortDescription;
   final String overview;
@@ -10,17 +11,20 @@ class DestinationModel {
   final List<String> galleryImageUrls;
   final double latitude;
   final double longitude;
-  final String difficulty; // Easy, Moderate, Hard
+  final String difficulty;
   final int estimatedBudgetNpr;
   final double averageRating;
   final int reviewCount;
   final bool isFeatured;
+  final bool approved;
+  final String submittedBy;
   final DateTime createdAt;
 
   DestinationModel({
     required this.id,
     required this.name,
-    required this.category,
+    required this.categoryId,
+    required this.categoryName,
     required this.province,
     required this.shortDescription,
     required this.overview,
@@ -34,6 +38,8 @@ class DestinationModel {
     required this.averageRating,
     required this.reviewCount,
     required this.isFeatured,
+    required this.approved,
+    required this.submittedBy,
     required this.createdAt,
   });
 
@@ -41,7 +47,8 @@ class DestinationModel {
     return DestinationModel(
       id: id,
       name: map['name'] ?? '',
-      category: map['category'] ?? '',
+      categoryId: map['categoryId'] ?? '',
+      categoryName: map['categoryName'] ?? '',
       province: map['province'] ?? '',
       shortDescription: map['shortDescription'] ?? '',
       overview: map['overview'] ?? '',
@@ -55,6 +62,8 @@ class DestinationModel {
       averageRating: (map['averageRating'] ?? 0).toDouble(),
       reviewCount: map['reviewCount'] ?? 0,
       isFeatured: map['isFeatured'] ?? false,
+      approved: map['approved'] ?? false,
+      submittedBy: map['submittedBy'] ?? '',
       createdAt: map['createdAt'] != null
           ? DateTime.parse(map['createdAt'])
           : DateTime.now(),
@@ -64,7 +73,8 @@ class DestinationModel {
   Map<String, dynamic> toMap() {
     return {
       'name': name,
-      'category': category,
+      'categoryId': categoryId,
+      'categoryName': categoryName,
       'province': province,
       'shortDescription': shortDescription,
       'overview': overview,
@@ -78,6 +88,8 @@ class DestinationModel {
       'averageRating': averageRating,
       'reviewCount': reviewCount,
       'isFeatured': isFeatured,
+      'approved': approved,
+      'submittedBy': submittedBy,
       'createdAt': createdAt.toIso8601String(),
     };
   }

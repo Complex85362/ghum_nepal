@@ -14,7 +14,7 @@ class WishlistRepository {
         'destinationId': destination.id,
         'name': destination.name,
         'coverImageUrl': destination.coverImageUrl,
-        'category': destination.category,
+        'category': destination.categoryId,
         'addedAt': DateTime.now().toIso8601String(),
       });
     } catch (_) {

@@ -27,7 +27,11 @@ class AppTopNav extends StatelessWidget implements PreferredSizeWidget {
                 onPressed: onMenuTap,
               ),
             GestureDetector(
-              onTap: () => Navigator.pushNamed(context, '/home'),
+              onTap: () {
+                if (ModalRoute.of(context)?.settings.name != '/home') {
+                  Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
+                }
+              },
               child: Text(
                 'LOGO',
                 style: TextStyle(
@@ -40,11 +44,19 @@ class AppTopNav extends StatelessWidget implements PreferredSizeWidget {
             const Spacer(),
             if (!isMobile) ...[
               TextButton(
-                onPressed: () => Navigator.pushNamed(context, '/submit'),
+                onPressed: () {
+                  if (ModalRoute.of(context)?.settings.name != '/submit') {
+                    Navigator.pushNamed(context, '/submit');
+                  }
+                },
                 child: const Text('Submit', style: TextStyle(color: AppColors.primary)),
               ),
               TextButton(
-                onPressed: () => Navigator.pushNamed(context, '/home'),
+                onPressed: () {
+                  if (ModalRoute.of(context)?.settings.name != '/home') {
+                    Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
+                  }
+                },
                 child: const Text('Discover', style: TextStyle(color: AppColors.primary)),
               ),
               const SizedBox(width: AppSpacing.md),
@@ -85,7 +97,11 @@ class AppTopNav extends StatelessWidget implements PreferredSizeWidget {
             ),
             IconButton(
               icon: const Icon(Icons.person_outline, color: AppColors.primary),
-              onPressed: () => Navigator.pushNamed(context, '/profile'),
+              onPressed: () {
+                if (ModalRoute.of(context)?.settings.name != '/profile') {
+                  Navigator.pushNamed(context, '/profile');
+                }
+              },
             ),
           ],
         ),

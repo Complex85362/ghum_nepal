@@ -53,6 +53,7 @@ class _LoginScreenState extends State<LoginScreen> {
             const SizedBox(height: AppSpacing.lg),
             Align(
               alignment: Alignment.centerLeft,
+              heightFactor: 1.0,
               child: Text('Email', style: AppTextStyles.label),
             ),
             const SizedBox(height: AppSpacing.xs),
@@ -64,6 +65,7 @@ class _LoginScreenState extends State<LoginScreen> {
             const SizedBox(height: AppSpacing.md),
             Align(
               alignment: Alignment.centerLeft,
+              heightFactor: 1.0,
               child: Text('Password', style: AppTextStyles.label),
             ),
             const SizedBox(height: AppSpacing.xs),

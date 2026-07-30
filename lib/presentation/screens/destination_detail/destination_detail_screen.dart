@@ -91,19 +91,19 @@ class _DestinationDetailScreenState extends State<DestinationDetailScreen>
         state: _destinationState,
         onRetry: _load,
         builder: (context, destination) => SingleChildScrollView(
-          child: MaxWidthBox(
-            maxWidth: 900,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Image.network(
-                  destination.coverImageUrl,
-                  height: 280,
-                  width: double.infinity,
-                  fit: BoxFit.cover,
-                  errorBuilder: (c, e, s) => Container(height: 280, color: AppColors.divider),
-                ),
-                Padding(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Image.network(
+                destination.coverImageUrl,
+                height: 400,
+                width: double.infinity,
+                fit: BoxFit.cover,
+                errorBuilder: (c, e, s) => Container(height: 400, color: AppColors.divider),
+              ),
+              MaxWidthBox(
+                maxWidth: 900,
+                child: Padding(
                   padding: EdgeInsets.symmetric(
                     horizontal: isMobile ? AppSpacing.md : AppSpacing.xl,
                     vertical: AppSpacing.lg,
@@ -111,38 +111,43 @@ class _DestinationDetailScreenState extends State<DestinationDetailScreen>
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Expanded(
-                            child: Text(
+                      SizedBox(
+                        width: double.infinity,
+                        child: Stack(
+                          alignment: Alignment.center,
+                          children: [
+                            Text(
                               destination.name,
                               style: AppTextStyles.heading1,
                               textAlign: TextAlign.center,
                             ),
-                          ),
-                          Consumer2<AuthProvider, WishlistProvider>(
-                            builder: (context, auth, wishlist, _) {
-                              final uid = auth.user?.uid;
-                              final saved = wishlist.isSaved(destination.id);
-                              return IconButton(
-                                icon: Icon(
-                                  saved ? Icons.bookmark : Icons.bookmark_border,
-                                  color: AppColors.primary,
-                                ),
-                                onPressed: uid == null
-                                    ? () => ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                      content: Text('Log in to save destinations.')),
-                                )
-                                    : () => wishlist.toggle(uid, destination),
-                              );
-                            },
-                          ),
-                        ],
+                            Positioned(
+                              right: 0,
+                              child: Consumer2<AuthProvider, WishlistProvider>(
+                                builder: (context, auth, wishlist, _) {
+                                  final uid = auth.user?.uid;
+                                  final saved = wishlist.isSaved(destination.id);
+                                  return IconButton(
+                                    icon: Icon(
+                                      saved ? Icons.bookmark : Icons.bookmark_border,
+                                      color: AppColors.primary,
+                                    ),
+                                    onPressed: uid == null
+                                        ? () => ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                          content: Text('Log in to save destinations.')),
+                                    )
+                                        : () => wishlist.toggle(uid, destination),
+                                  );
+                                },
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                       const SizedBox(height: AppSpacing.xs),
                       Center(
+                        heightFactor: 1.0,
                         child: Text(destination.categoryName,
                             style: AppTextStyles.caption.copyWith(color: AppColors.primary)),
                       ),
@@ -183,8 +188,8 @@ class _DestinationDetailScreenState extends State<DestinationDetailScreen>
                     ],
                   ),
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),

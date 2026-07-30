@@ -4,14 +4,13 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/widgets/responsive_layout.dart';
-import '../../../core/widgets/max_width_box.dart';
 import '../../../core/widgets/state_view.dart';
 import '../../../data/models/destination_model.dart';
 import '../../providers/admin_provider.dart';
 import '../../widgets/admin_sidebar.dart';
 import 'admin_destinations_screen.dart';
 import 'category_management_screen.dart';
-
+import '../../../core/widgets/admin_content_box.dart';
 class AdminPanelScreen extends StatefulWidget {
   const AdminPanelScreen({super.key});
 
@@ -42,37 +41,42 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
   Widget build(BuildContext context) {
     final isMobile = ResponsiveLayout.isMobile(context);
 
-    if (isMobile) {
-      return Scaffold(
-        appBar: AppBar(
-          backgroundColor: AppColors.primary,
-          iconTheme: const IconThemeData(color: Colors.white),
-          title: const Text('Admin Panel', style: TextStyle(color: Colors.white)),
-        ),
-        drawer: Drawer(
-          child: AdminSidebar(
-            selectedIndex: _selectedIndex,
-            onSelect: (i) {
-              _onSelect(i);
-              Navigator.pop(context);
-            },
-          ),
-        ),
-        body: SingleChildScrollView(child: _content()),
-      );
-    }
-
     return Scaffold(
-      body: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SizedBox(
-            width: 220,
-            child: AdminSidebar(selectedIndex: _selectedIndex, onSelect: _onSelect),
-          ),
-          Expanded(child: SingleChildScrollView(child: _content())),
-        ],
-      ),
+      appBar: isMobile
+          ? AppBar(
+              backgroundColor: AppColors.primary,
+              iconTheme: const IconThemeData(color: Colors.white),
+              title: const Text('Admin Panel', style: TextStyle(color: Colors.white)),
+            )
+          : null,
+      drawer: isMobile
+          ? Drawer(
+              child: AdminSidebar(
+                selectedIndex: _selectedIndex,
+                onSelect: (i) {
+                  if (i == 4) {
+                    Navigator.pop(context); // Close drawer first
+                    Navigator.pushReplacementNamed(context, '/home');
+                  } else {
+                    _onSelect(i);
+                    Navigator.pop(context); // Close drawer
+                  }
+                },
+              ),
+            )
+          : null,
+      body: isMobile
+          ? SingleChildScrollView(child: _content())
+          : Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                SizedBox(
+                  width: 220,
+                  child: AdminSidebar(selectedIndex: _selectedIndex, onSelect: _onSelect),
+                ),
+                Expanded(child: SingleChildScrollView(child: _content())),
+              ],
+            ),
     );
   }
 
@@ -91,7 +95,7 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
   }
 
   Widget _dashboardContent() {
-    return MaxWidthBox(
+    return AdminContentBox(
       maxWidth: 1000,
       child: Padding(
         padding: const EdgeInsets.all(AppSpacing.xl),
@@ -114,7 +118,7 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
     final provider = context.watch<AdminProvider>();
     final isMobile = ResponsiveLayout.isMobile(context);
 
-    return MaxWidthBox(
+    return AdminContentBox(
       maxWidth: 1000,
       child: Padding(
         padding: const EdgeInsets.all(AppSpacing.xl),
@@ -196,6 +200,10 @@ class _SubmissionCard extends StatelessWidget {
                   onPressed: onApprove,
                   icon: const Icon(Icons.arrow_forward, size: 16),
                   label: const Text('Approve'),
+                  style: ElevatedButton.styleFrom(
+                    minimumSize: const Size(0, 36),
+                    padding: EdgeInsets.zero,
+                  ),
                 ),
               ),
               const SizedBox(width: AppSpacing.sm),

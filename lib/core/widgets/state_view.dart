@@ -22,6 +22,7 @@ class StateView<T> extends StatelessWidget {
     switch (state) {
       case ViewLoading<T>():
         return const Center(
+          heightFactor: 1.0,
           child: Padding(
             padding: EdgeInsets.all(AppSpacing.xl),
             child: CircularProgressIndicator(color: AppColors.primary),
@@ -29,6 +30,7 @@ class StateView<T> extends StatelessWidget {
         );
       case ViewEmpty<T>(:final message):
         return Center(
+          heightFactor: 1.0,
           child: Padding(
             padding: const EdgeInsets.all(AppSpacing.xl),
             child: Column(
@@ -46,6 +48,7 @@ class StateView<T> extends StatelessWidget {
         );
       case ViewFailed<T>(:final message):
         return Center(
+          heightFactor: 1.0,
           child: Padding(
             padding: const EdgeInsets.all(AppSpacing.xl),
             child: Column(

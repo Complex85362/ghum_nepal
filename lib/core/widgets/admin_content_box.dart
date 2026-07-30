@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 
-class MaxWidthBox extends StatelessWidget {
+class AdminContentBox extends StatelessWidget {
   final Widget child;
   final double maxWidth;
 
-  const MaxWidthBox({super.key, required this.child, this.maxWidth = 1200});
+  const AdminContentBox({super.key, required this.child, this.maxWidth = 1000});
 
   @override
   Widget build(BuildContext context) {
     return Align(
-      alignment: Alignment.topCenter,
+      alignment: Alignment.topLeft,
       heightFactor: 1.0,
       child: ConstrainedBox(
         constraints: BoxConstraints(maxWidth: maxWidth),

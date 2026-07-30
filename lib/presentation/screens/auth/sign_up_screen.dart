@@ -56,7 +56,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text('Login', style: AppTextStyles.heading1),
+            Text('Sign Up', style: AppTextStyles.heading1),
             const SizedBox(height: AppSpacing.lg),
             _label('Email'),
             TextFormField(
@@ -97,7 +97,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     ? const SizedBox(
                     height: 20, width: 20,
                     child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-                    : const Text('Sign In'),
+                    : const Text('Sign Up'),
               ),
             ),
           ],
@@ -108,6 +108,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
   Widget _label(String text) => Align(
     alignment: Alignment.centerLeft,
+    heightFactor: 1.0,
     child: Padding(
       padding: const EdgeInsets.only(bottom: AppSpacing.xs),
       child: Text(text, style: AppTextStyles.label),

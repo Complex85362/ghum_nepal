@@ -20,6 +20,8 @@ import 'presentation/screens/submission/submission_form_screen.dart';
 class GhumNepalApp extends StatelessWidget {
   const GhumNepalApp({super.key});
 
+  static final _messengerKey = GlobalKey<ScaffoldMessengerState>();
+
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
@@ -57,6 +59,7 @@ class GhumNepalApp extends StatelessWidget {
       child: MaterialApp(
         title: 'GhumNepal',
         debugShowCheckedModeBanner: false,
+        scaffoldMessengerKey: _messengerKey,
         theme: AppTheme.light,
         initialRoute: '/',
         routes: {

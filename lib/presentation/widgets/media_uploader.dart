@@ -43,7 +43,9 @@ class _MediaUploaderState extends State<MediaUploader> {
 
     try {
       final bytes = await picked.readAsBytes();
-      final fileName = '${DateTime.now().millisecondsSinceEpoch}_${picked.name}';
+      final sanitizedName = picked.name
+          .replaceAll(RegExp(r'[^a-zA-Z0-9._-]'), '_');
+      final fileName = '${DateTime.now().millisecondsSinceEpoch}_$sanitizedName';
       final path = '${widget.folder}/$fileName';
 
       await Supabase.instance.client.storage
@@ -57,9 +59,9 @@ class _MediaUploaderState extends State<MediaUploader> {
         _uploading = false;
       });
       widget.onUploaded(publicUrl);
-    } catch (_) {
+    }  catch (e) {
       setState(() {
-        _error = 'Upload failed. Please try again.';
+        _error = 'Upload failed: $e';
         _uploading = false;
       });
     }

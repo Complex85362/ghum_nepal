@@ -13,7 +13,10 @@ class AppTheme {
       colorScheme: ColorScheme.fromSeed(
         seedColor: AppColors.primary,
         primary: AppColors.primary,
+        secondary: AppColors.secondary,
+        tertiary: AppColors.tertiary,
         error: AppColors.error,
+        surface: AppColors.surface,
       ),
       appBarTheme: AppBarTheme(
         backgroundColor: AppColors.background,

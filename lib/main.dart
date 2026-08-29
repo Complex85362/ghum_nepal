@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_core/firebase_core.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
-import 'firebase_options.dart';
+import 'core/service/firebase_service.dart';
+import 'core/service/supabase_service.dart';
 import 'app.dart';
 
 void main() async {
@@ -23,12 +22,8 @@ void main() async {
     );
   };
 
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
-  await Supabase.initialize(
-    url: 'https://uxplbucgzotnixvbxtjc.supabase.co',
-    publishableKey: 'sb_publishable_9bmxo0vEc90SzikYHM_SDg_Py_4-Fyx',
-  );
+  await FirebaseService.initialize();
+  await SupabaseService.initialize();
+
   runApp(const GhumNepalApp());
 }

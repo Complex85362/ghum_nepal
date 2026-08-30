@@ -107,14 +107,9 @@ class _SearchScreenState extends State<SearchScreen> {
                   )
                 else if (_results.isNotEmpty)
                     Expanded(
-                      child: GridView.builder(
+                      child: ListView.separated(
                         itemCount: _results.length,
-                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: isMobile ? 1 : 3,
-                          crossAxisSpacing: AppSpacing.lg,
-                          mainAxisSpacing: AppSpacing.lg,
-                          childAspectRatio: isMobile ? 2.5 : 1,
-                        ),
+                        separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.md),
                         itemBuilder: (context, index) {
                           final d = _results[index];
                           return Container(
@@ -133,7 +128,7 @@ class _SearchScreenState extends State<SearchScreen> {
                               ),
                               title: Text(d.name, style: AppTextStyles.label),
                               subtitle: Text(d.shortDescription,
-                                  maxLines: 1, overflow: TextOverflow.ellipsis),
+                                  maxLines: 2, overflow: TextOverflow.ellipsis),
                               onTap: () => Navigator.push(
                                 context,
                                 MaterialPageRoute(

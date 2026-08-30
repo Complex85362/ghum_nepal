@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "958648486231",
+    "project_id": "ghumnepal-9cec4",
+    "storage_bucket": "ghumnepal-9cec4.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:958648486231:android:c190a79fff93d7d9dd1612",
+        "android_client_info": {
+          "package_name": "com.example.ghum_nepal"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "958648486231-ehfjf8af21sfn1kcisgd25kkep275a6k.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCu0mc7LaMtDZ3QeZH3NBPQfwXRhE4MJzs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "958648486231-ehfjf8af21sfn1kcisgd25kkep275a6k.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "958648486231-5m2ts4noen9ne3hct7jfhlh3ad2ram6v.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.ghumNepal"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

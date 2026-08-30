@@ -221,33 +221,45 @@ class _DestinationDetailScreenState extends State<DestinationDetailScreen> {
       _StatItem(Icons.payments_outlined, 'EST. COST', 'NPR ${destination.estimatedBudgetNpr}'),
     ];
 
-    return GridView.count(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      crossAxisCount: isMobile ? 2 : stats.length,
-      mainAxisSpacing: AppSpacing.sm,
-      crossAxisSpacing: AppSpacing.sm,
-      childAspectRatio: isMobile ? 1.6 : 1.3,
-      children: stats
-          .map((s) => Container(
-        padding: const EdgeInsets.all(AppSpacing.md),
-        decoration: BoxDecoration(
-          color: AppColors.surface,
-          borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-          border: Border.all(color: AppColors.divider),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(s.icon, color: AppColors.secondary, size: 20),
-            const SizedBox(height: 6),
-            Text(s.label, style: AppTextStyles.caption),
-            Text(s.value, style: AppTextStyles.label),
-          ],
-        ),
-      ))
-          .toList(),
+    // A LayoutBuilder + Wrap instead of a fixed-aspect-ratio GridView: each
+    // stat card is only as tall as its own content needs, so a long value
+    // like "Best Time" text just makes that one card taller instead of
+    // overflowing a rigid cell sized for short values like "Easy" or
+    // "1000m". Same fix as the search results list, the Discover feed's
+    // tag row, and the admin panel's pending-reviews cards.
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final columns = isMobile ? 2 : stats.length;
+        final spacing = AppSpacing.sm;
+        final cardWidth = (constraints.maxWidth - spacing * (columns - 1)) / columns;
+        return Wrap(
+          spacing: spacing,
+          runSpacing: spacing,
+          children: stats
+              .map((s) => SizedBox(
+            width: cardWidth,
+            child: Container(
+              padding: const EdgeInsets.all(AppSpacing.md),
+              decoration: BoxDecoration(
+                color: AppColors.surface,
+                borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+                border: Border.all(color: AppColors.divider),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(s.icon, color: AppColors.secondary, size: 20),
+                  const SizedBox(height: 6),
+                  Text(s.label, style: AppTextStyles.caption),
+                  Text(s.value, style: AppTextStyles.label),
+                ],
+              ),
+            ),
+          ))
+              .toList(),
+        );
+      },
     );
   }
 

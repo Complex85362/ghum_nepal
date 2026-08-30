@@ -138,21 +138,24 @@ class DiscoverDestinationCard extends StatelessWidget {
                     ],
                     if (destination.tags.isNotEmpty) ...[
                       const SizedBox(height: AppSpacing.xs),
-                      Wrap(
-                        spacing: 6,
-                        runSpacing: 4,
+                      Row(
                         children: destination.tags.take(2).map((tag) {
-                          return Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                            decoration: BoxDecoration(
-                              color: AppColors.secondaryContainer,
-                              borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-                            ),
-                            child: Text(
-                              tag,
-                              style: AppTextStyles.caption.copyWith(
-                                color: AppColors.secondary,
-                                fontWeight: FontWeight.w600,
+                          return Flexible(
+                            child: Container(
+                              margin: const EdgeInsets.only(right: 6),
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                              decoration: BoxDecoration(
+                                color: AppColors.secondaryContainer,
+                                borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
+                              ),
+                              child: Text(
+                                tag,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: AppTextStyles.caption.copyWith(
+                                  color: AppColors.secondary,
+                                  fontWeight: FontWeight.w600,
+                                ),
                               ),
                             ),
                           );

@@ -108,29 +108,33 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
               state: provider.pendingState,
               onRetry: () => provider.loadPending(),
               builder: (context, submissions) {
-                return GridView.builder(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  itemCount: submissions.length,
-                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: isMobile ? 1 : 3,
-                    crossAxisSpacing: AppSpacing.md,
-                    mainAxisSpacing: AppSpacing.md,
-                    childAspectRatio: isMobile ? 1.6 : 1.1,
-                  ),
-                  itemBuilder: (context, index) {
-                    final s = submissions[index];
-                    return _SubmissionCard(
-                      destination: s,
-                      onTap: () => Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => SubmissionReviewScreen(
+                return LayoutBuilder(
+                  builder: (context, constraints) {
+                    final columns = isMobile ? 1 : 3;
+                    final spacing = AppSpacing.md;
+                    final cardWidth = columns == 1
+                        ? constraints.maxWidth
+                        : (constraints.maxWidth - spacing * (columns - 1)) / columns;
+                    return Wrap(
+                      spacing: spacing,
+                      runSpacing: spacing,
+                      children: submissions.map((s) {
+                        return SizedBox(
+                          width: cardWidth,
+                          child: _SubmissionCard(
                             destination: s,
-                            onFinished: () => provider.loadPending(),
+                            onTap: () => Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => SubmissionReviewScreen(
+                                  destination: s,
+                                  onFinished: () => provider.loadPending(),
+                                ),
+                              ),
+                            ),
                           ),
-                        ),
-                      ),
+                        );
+                      }).toList(),
                     );
                   },
                 );
@@ -183,7 +187,6 @@ class _SubmissionCard extends StatelessWidget {
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
             ),
-            const Spacer(),
             const SizedBox(height: AppSpacing.sm),
             Container(
               width: double.infinity,
